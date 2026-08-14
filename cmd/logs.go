@@ -18,16 +18,21 @@ var (
 	flagSince     string
 	flagUntil     string
 	flagLimit     int
+	flagBeforeTS  string
+	flagBeforeID  int64
 )
 
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Query the log",
 	Long: `Prints entries newest first, filtered by app, level, free text, request id, and
-time. The default limit is 100, matching what the dashboard shows.
+time. Pages backwards until --limit entries are gathered, so a query asks for
+exactly what it returns.
 
 --since accepts a relative duration ("30m", "2h") or an RFC3339 timestamp;
---until is an RFC3339 timestamp. With --json the whole page is one document.`,
+--until is an RFC3339 timestamp. --before-ts/--before-id resume from a cursor
+(the pair --json emits as next_before). With --json the whole result is one
+document.`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signalContext()
@@ -46,31 +51,29 @@ time. The default limit is 100, matching what the dashboard shows.
 			return err
 		}
 
-		page, err := api.Logs(ctx, client.Filter{
+		entries, err := api.LogsPaged(ctx, client.Filter{
 			App:       flagApp,
 			Levels:    flagLevels,
 			Q:         flagQ,
 			RequestID: flagRequestID,
 			Since:     since,
 			Until:     until,
-			Limit:     flagLimit,
-		})
+			BeforeTS:  flagBeforeTS,
+			BeforeID:  flagBeforeID,
+		}, flagLimit)
 		if err != nil {
 			return err
 		}
 
 		if flagJSON {
-			return ui.JSON(page)
+			return ui.JSON(entries)
 		}
-		if len(page.Entries) == 0 {
+		if len(entries) == 0 {
 			ui.Step("no entries match")
 			return nil
 		}
-		for _, entry := range page.Entries {
+		for _, entry := range entries {
 			renderEntry(entry, false)
-		}
-		if page.NextBefore != nil {
-			ui.Hint("more entries available — pass --since earlier or use `journal tail`")
 		}
 		return nil
 	},
@@ -105,5 +108,7 @@ func init() {
 	logsCmd.Flags().StringVar(&flagRequestID, "request-id", "", "Exact match on meta request_id")
 	logsCmd.Flags().StringVar(&flagSince, "since", "", "Lower bound: duration (30m) or RFC3339")
 	logsCmd.Flags().StringVar(&flagUntil, "until", "", "Upper bound: RFC3339 timestamp")
-	logsCmd.Flags().IntVar(&flagLimit, "limit", 100, "Max entries, clamped to 1000 by the server")
+	logsCmd.Flags().IntVar(&flagLimit, "limit", 100, "Max entries to gather across pages")
+	logsCmd.Flags().StringVar(&flagBeforeTS, "before-ts", "", "Resume cursor ts, from a prior --json next_before")
+	logsCmd.Flags().Int64Var(&flagBeforeID, "before-id", 0, "Resume cursor id, from a prior --json next_before")
 }

@@ -64,8 +64,7 @@ consumer piping into jq wants.`,
 }
 
 // follow polls until the context is cancelled, printing each entry as it
-// appears in chronological order. A full page of new rows means the tail fell
-// behind; it warns once rather than silently sewing a cut stream together.
+// appears in chronological order.
 func follow(ctx context.Context, api *client.Client, filter client.Filter) error {
 	maxID := int64(0)
 	gapWarned := false
@@ -73,32 +72,14 @@ func follow(ctx context.Context, api *client.Client, filter client.Filter) error
 	for {
 		page, err := api.Logs(ctx, filter)
 		if err != nil {
-			var apiErr *client.Error
-			if errors.As(err, &apiErr) && apiErr.Unauthenticated() {
+			if err = retryPoll(ctx, err); err != nil {
 				return err
-			}
-			// A blip should not tear the tail down — the dashboard stays
-			// quiet through a restart too.
-			ui.Warn("poll failed, retrying — %s", err)
-			if !sleep(ctx) {
-				return ErrInterrupted
 			}
 			continue
 		}
 
-		// Entries arrive newest first. Collect the fresh ones, then reverse
-		// to chronological so the output reads like a log.
-		var fresh []client.Entry
-		for _, entry := range page.Entries {
-			if entry.ID > maxID {
-				fresh = append(fresh, entry)
-				maxID = entry.ID
-			}
-		}
-		for i, j := 0, len(fresh)-1; i < j; i, j = i+1, j-1 {
-			fresh[i], fresh[j] = fresh[j], fresh[i]
-		}
-
+		fresh, nextMax := collectFresh(page.Entries, maxID)
+		maxID = nextMax
 		if len(fresh) == pageSize && !gapWarned {
 			ui.Warn("more entries than one poll could carry — the stream was cut")
 			gapWarned = true
@@ -116,6 +97,40 @@ func follow(ctx context.Context, api *client.Client, filter client.Filter) error
 			return ErrInterrupted
 		}
 	}
+}
+
+// retryPoll decides whether a poll failure should tear the tail down or wait
+// and retry. An unauthenticated error ends the follow; anything else is a blip
+// the tail survives (the dashboard stays quiet through a restart too). It
+// returns nil after the wait, or the error that should end the follow.
+func retryPoll(ctx context.Context, err error) error {
+	var apiErr *client.Error
+	if errors.As(err, &apiErr) && apiErr.Unauthenticated() {
+		return err
+	}
+	ui.Warn("poll failed, retrying — %s", err)
+	if !sleep(ctx) {
+		return ErrInterrupted
+	}
+	return nil
+}
+
+// collectFresh filters a polled page down to the entries newer than the last
+// one printed, in chronological order. The page arrives newest first; the
+// result is reversed so the tail reads like a log. It returns the fresh rows
+// and the new high-water mark.
+func collectFresh(entries []client.Entry, maxID int64) ([]client.Entry, int64) {
+	var fresh []client.Entry
+	for _, entry := range entries {
+		if entry.ID > maxID {
+			fresh = append(fresh, entry)
+			maxID = entry.ID
+		}
+	}
+	for i, j := 0, len(fresh)-1; i < j; i, j = i+1, j-1 {
+		fresh[i], fresh[j] = fresh[j], fresh[i]
+	}
+	return fresh, maxID
 }
 
 // sleep returns false when the context is cancelled before the poll interval

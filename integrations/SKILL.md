@@ -33,7 +33,7 @@ journal logout                      Revoke the stored session
 ### Reading logs
 ```
 journal apps                        Which apps have logged and how recently
-journal logs [filters]              Query newest-first, one page
+journal logs [filters]              Query newest-first; pages until --limit entries
 journal tail [filters]              Follow new entries as they land
 journal context <id> [--before 50] [--after 50]   Stream around one entry
 ```
@@ -54,6 +54,8 @@ journal context <id> [--before 50] [--after 50]   Stream around one entry
   (browser flow) once, or set `JOURNAL_TOKEN` in a headless/CI context.
 - Output is newest first for `logs`, chronological for `tail` and `context`.
 - The entry id is the anchor for `context` — `journal logs --json` returns ids.
+- `logs` pages backwards until it has `--limit` entries (default 100);
+  `--before-ts`/`--before-id` resume from a logical cursor.
 - `--json` prints one document (logs/apps/context) or one doc per line (tail),
   forcing colour off and leaving colour rules to the consumer.
 - Level severity is colour-coded by default; `--no-color` disables it.

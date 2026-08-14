@@ -220,6 +220,59 @@ func (c *Client) Logs(ctx context.Context, filter Filter) (ListResponse, error) 
 	return out, err
 }
 
+// maxPage is the server's per-request ceiling, which the walker never exceeds
+// for a single request.
+const maxPage = 1000
+
+// LogsPaged walks the keyset cursor until it has collected limit entries (or
+// the stream ends), so a caller asking for more than one page gets exactly what
+// it asked for instead of the first page plus a hint. Each request is bounded
+// by maxPage; the walker owns the cursor and the budget.
+func (c *Client) LogsPaged(ctx context.Context, filter Filter, limit int) ([]Entry, error) {
+	var out []Entry
+	beforeTS, beforeID := filter.BeforeTS, filter.BeforeID
+
+	for {
+		want := limit - len(out)
+		if want > maxPage {
+			want = maxPage
+		}
+		page, err := c.Logs(ctx, Filter{
+			App:       filter.App,
+			Levels:    filter.Levels,
+			Q:         filter.Q,
+			RequestID: filter.RequestID,
+			Since:     filter.Since,
+			Until:     filter.Until,
+			Limit:     want,
+			BeforeTS:  beforeTS,
+			BeforeID:  beforeID,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		beforeTS, beforeID = cursorValue(page.NextBefore)
+		out = append(out, page.Entries...)
+		if len(page.Entries) == 0 || len(out) >= limit || page.NextBefore == nil {
+			break
+		}
+	}
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+// cursorValue unpacks a page cursor into the two fields the walker sends back
+// on the next request. A nil cursor yields nothing, which stops the loop.
+func cursorValue(cursor *Cursor) (string, int64) {
+	if cursor == nil {
+		return "", 0
+	}
+	return cursor.Ts, cursor.ID
+}
+
 // Context returns the stream around one entry, ignoring all filters.
 func (c *Client) Context(ctx context.Context, id int64, before, after int) (ListResponse, error) {
 	var out ListResponse

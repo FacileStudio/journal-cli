@@ -55,7 +55,8 @@ journal logs --level error --since 30m
 journal logs --app sablier --q "upload" --request-id 7f3a
 journal tail --app courrier --level error
 journal context 48213                 # what led to that entry
-journal logs --json | jq '.[0].id'    # ids for the next context pivot
+journal logs --limit 500 --json | jq '.[].id'   # page through up to the limit
+journal logs --level error --before-ts 2026-08-13T00:00:03Z --before-id 48213   # resume a cursor
 ```
 
 ## Rules of the road
