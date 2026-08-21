@@ -20,7 +20,8 @@ cmd/               one file per command; root.go owns flags and exit codes,
                    format.go the rendering shared between them
 internal/
   client/          the HTTP surface
-  config/          the instance URL and the session token
+  config/          the instance URL and the session token, as YAML at
+                   ${XDG_CONFIG_HOME:-~/.config}/journal/config.yml
   loopback/        the porte SSO one-time-code listener
   ui/              CLI-STANDARD §4 output vocabulary, copied verbatim
 integrations/      SKILL.md, the AI agent registration
@@ -28,8 +29,10 @@ install.sh         generated from Wiki/install.sh.template; only the config bloc
 scripts/check.sh   the quality gate, copied from antenne-cli
 ```
 
-Dependencies are cobra, `fatih/color` and `golang.org/x/term`. Adding a fourth
-needs a reason — a client for one API does not need a framework.
+Dependencies are cobra, `fatih/color`, `golang.org/x/term` and `gopkg.in/yaml.v3`.
+The last one is there because CLI-STANDARD §6.1 mandates YAML for the config file;
+the standard is normative and Go has no YAML in its standard library. Adding a
+fifth needs a reason — a client for one API does not need a framework.
 
 ## Conventions
 
@@ -66,7 +69,7 @@ browser SDK, and `curl` cover shipping, and a CLI adds nothing there.
   echoed and verified, so a callback from a different login is refused.
 - **Password**: prompts for an address and a password, exchanged at `/api/auth/login`.
 
-Both end with a bearer token stored in `<config_dir>/journal/config.json` (0600), and both
+Both end with a bearer token stored in `<config_dir>/journal/config.yml` (0600), and both
 logout paths revoke it server-side.
 
 ## Gotchas
