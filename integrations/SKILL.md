@@ -9,7 +9,7 @@ description: >
 # journal — Facile centralized logging
 
 Binary: `journal`
-Config: `<config_dir>/journal/config.json` (instance URL + session token)
+Config: `<config_dir>/journal/config.yml` (instance URL + session token)
 
 Journal is the suite's centralized logging service. Every Facile app ships
 structured log entries to one instance at `https://journal.facile.studio`; this

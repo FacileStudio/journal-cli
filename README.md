@@ -19,7 +19,7 @@ the dashboard. Authenticates through the same porte SSO flow the browser uses.
 
 | Layer | Tech |
 |---|---|
-| CLI | Go 1.25, cobra, session token in a 0600 config file |
+| CLI | Go 1.25, cobra, session token in a 0600 YAML config file |
 | Auth | porte SSO CLI flow (`?flow=cli` → loopback → `/auth/oidc/exchange`), or password |
 | Releases | GoReleaser via facile |
 

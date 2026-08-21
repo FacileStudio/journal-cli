@@ -38,7 +38,7 @@ fail() { echo "FAIL: $1" >&2; exit 1; }
 # 1. login writes a config
 OUT="$("$BIN" --url "$URL" login --email a@b.c --password secret 2>&1)"
 echo "$OUT" | grep -q "signed in" || fail "login output: $OUT"
-[ -f "$XDG_CONFIG_HOME/journal/config.json" ] || fail "no config written"
+[ -f "$XDG_CONFIG_HOME/journal/config.yml" ] || fail "no config written"
 
 # 2. logs without login args now works (token from file)
 OUT="$("$BIN" --url "$URL" logs 2>&1)"
