@@ -53,7 +53,7 @@ address and a password on the command line instead.`,
 		if flagURL != "" {
 			cfg.URL = config.NormalizeURL(flagURL)
 		}
-		if fromEnv := os.Getenv("JOURNAL_URL"); fromEnv != "" && flagURL == "" && len(args) == 0 {
+		if fromEnv := serverURLFromEnv(); fromEnv != "" && flagURL == "" && len(args) == 0 {
 			cfg.URL = config.NormalizeURL(fromEnv)
 		}
 		if cfg.URL == "" {

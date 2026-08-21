@@ -44,8 +44,8 @@ journal login --email you@x --password …   # password flow, headless
 ```
 
 The URL defaults to `https://journal.facile.studio`, the suite's shared
-instance; `journal login <url>` stores another. `JOURNAL_URL` overrides the
-stored URL, `--url` overrides both.
+instance; `journal login <url>` stores another. `JOURNAL_SERVER_URL` overrides the
+stored URL (`JOURNAL_URL` is an accepted alias), and `--url` overrides both.
 
 ## Usage
 
