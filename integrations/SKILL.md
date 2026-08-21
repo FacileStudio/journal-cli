@@ -59,7 +59,8 @@ journal context <id> [--before 50] [--after 50]   Stream around one entry
 - `--json` prints one document (logs/apps/context) or one doc per line (tail),
   forcing colour off and leaving colour rules to the consumer.
 - Level severity is colour-coded by default; `--no-color` disables it.
-- `JOURNAL_URL` overrides the stored instance; `--url` overrides both.
+- `JOURNAL_SERVER_URL` overrides the stored instance (`JOURNAL_URL` is an accepted
+  alias); `--url` overrides both.
 - Exit: `0` success, `1` failure, `2` usage, `130` SIGINT.
 - Prefer `journal logs --q <term> --since 30m` to answer "what happened" —
   it is the cheapest probe and returns ids to pivot with `context`.

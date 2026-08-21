@@ -108,7 +108,7 @@ func connect() (*client.Client, config.Config, error) {
 		return nil, cfg, err
 	}
 
-	if fromEnv := os.Getenv("JOURNAL_URL"); fromEnv != "" {
+	if fromEnv := serverURLFromEnv(); fromEnv != "" {
 		cfg.URL = config.NormalizeURL(fromEnv)
 	}
 	if flagURL != "" {
@@ -122,4 +122,15 @@ func connect() (*client.Client, config.Config, error) {
 	}
 
 	return client.New(cfg.URL, cfg.Token), cfg, nil
+}
+
+// serverURLFromEnv reads the instance URL from the environment, preferring the
+// suite-wide JOURNAL_SERVER_URL that CLI-STANDARD §6.3 names over the
+// JOURNAL_URL this CLI shipped with. The older spelling stays an accepted alias
+// so an existing shell profile keeps working.
+func serverURLFromEnv() string {
+	if value := os.Getenv("JOURNAL_SERVER_URL"); value != "" {
+		return value
+	}
+	return os.Getenv("JOURNAL_URL")
 }

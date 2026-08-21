@@ -94,6 +94,11 @@ func readSecure(f *os.File) ([]byte, error) {
 // afterwards: writing first and fixing the mode second leaves a window in which
 // the token is world-readable, and on a shared machine that window is the whole
 // attack. The directory is created 0700 for the same reason.
+//
+// The mode is re-asserted on the open handle because the perm argument to
+// OpenFile applies only when the file is created — an existing file keeps
+// whatever mode it already had. This is the same belt-and-braces `facile`'s own
+// credential writer uses.
 func Save(cfg Config) error {
 	if err := os.MkdirAll(Dir(), 0o700); err != nil {
 		return err
@@ -108,6 +113,10 @@ func Save(cfg Config) error {
 	if err != nil {
 		return err
 	}
+	if err := f.Chmod(0o600); err != nil {
+		f.Close()
+		return err
+	}
 	if _, err := f.Write(data); err != nil {
 		f.Close()
 		return err
@@ -117,10 +126,15 @@ func Save(cfg Config) error {
 
 // Clear removes the stored session but keeps the instance URL, so logging out
 // does not also make the user retype where their Journal is.
+//
+// A file that cannot be parsed still loses its token. Logout is what somebody
+// reaches for on a borrowed machine, and refusing because the YAML is malformed
+// would leave a working credential exactly where they tried to remove it. The
+// URL is unrecoverable in that case, so it falls back to the default.
 func Clear() error {
 	cfg, err := Load()
 	if err != nil {
-		return err
+		cfg = Config{URL: DefaultURL}
 	}
 	cfg.Token = ""
 	return Save(cfg)

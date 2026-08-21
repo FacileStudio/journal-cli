@@ -21,21 +21,23 @@ instance URL so the next login needs nothing.`,
 		defer stop()
 
 		cfg, err := config.Load()
-		if err != nil {
-			return err
+		unreadable := err != nil
+		if unreadable {
+			ui.Warn("the stored configuration could not be read — clearing it anyway")
+			cfg = config.Config{URL: config.DefaultURL}
 		}
-		if cfg.Token == "" {
+		if cfg.Token == "" && !unreadable {
 			ui.Warn("no session stored")
 			return nil
 		}
 
-		api := client.New(cfg.URL, cfg.Token)
-		if err := api.Logout(ctx); err != nil {
-			var apiErr *client.Error
-			// A session the server has already dropped is not worth failing
-			// over: clearing locally is the point.
-			if !errors.As(err, &apiErr) || !apiErr.Unauthenticated() {
-				ui.Warn("the server could not revoke the session — %s", err)
+		if cfg.Token != "" {
+			api := client.New(cfg.URL, cfg.Token)
+			if err := api.Logout(ctx); err != nil {
+				var apiErr *client.Error
+				if !errors.As(err, &apiErr) || !apiErr.Unauthenticated() {
+					ui.Warn("the server could not revoke the session — %s", err)
+				}
 			}
 		}
 		if err := config.Clear(); err != nil {
