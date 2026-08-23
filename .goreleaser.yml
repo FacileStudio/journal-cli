@@ -26,3 +26,21 @@ checksum:
 
 changelog:
   sort: asc
+
+brews:
+  - name: journal
+    homepage: https://github.com/FacileStudio/journal-cli
+    description: Terminal client for Journal, the suite's centralized logging service
+    directory: Formula
+    repository:
+      owner: FacileStudio
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    install: |
+      bin.install "journal"
+    test: |
+      system "#{bin}/journal", "--version"
