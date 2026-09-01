@@ -13,6 +13,7 @@ the dashboard. Authenticates through the same porte SSO flow the browser uses.
 - `journal tail` — follow new entries as they land (2s poll, the dashboard's own cadence)
 - `journal context <id>` — the stream around one entry, with the anchor marked
 - `journal apps` — what has logged, and how recently
+- `journal keys` — create, list, and revoke secret and public API ingest keys
 - `--json` on every command carrying data; ndjson lines from `tail`
 
 ## Stack
@@ -55,6 +56,10 @@ journal logs --level error --since 30m
 journal logs --app sablier --q "upload" --request-id 7f3a
 journal tail --app courrier --level error
 journal context 48213                 # what led to that entry
+journal keys list                     # list all API keys
+journal keys create --app myapp       # generate a backend secret key
+journal keys create --app myapp --public --origins https://myapp.com --quota 10000 # public browser key
+journal keys revoke 4                 # revoke key by id
 journal logs --limit 500 --json | jq '.[].id'   # page through up to the limit
 journal logs --level error --before-ts 2026-08-13T00:00:03Z --before-id 48213   # resume a cursor
 ```

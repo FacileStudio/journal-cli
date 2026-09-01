@@ -73,6 +73,7 @@ func Execute() {
 		tailCmd,
 		contextCmd,
 		appsCmd,
+		keysCmd,
 	)
 
 	err := rootCmd.Execute()

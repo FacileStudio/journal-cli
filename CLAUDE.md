@@ -53,11 +53,11 @@ to every machine by mycelium. When this repo disagrees with it, this repo is wro
   is added by the printer, never baked into the message.
 - `--version` prints exactly `journal <semver>` — the installer parses that line.
 
-## The client is read-only
+## The API surface
 
-The read endpoints (`/api/logs`, `/api/logs/{id}/context`, `/api/apps`) are all this CLI
-talks to after login. Ingest is deliberately out of scope: the Go SDK (`sdk/journal`), the
-browser SDK, and `curl` cover shipping, and a CLI adds nothing there.
+The read endpoints (`/api/logs`, `/api/logs/{id}/context`, `/api/apps`) and the key management
+endpoints (`/api/apikeys`) are what this CLI talks to after login. Ingest is covered by the Go
+SDK (`sdk/journal`) and browser SDK (`@facile/journal`).
 
 ## The login flow
 

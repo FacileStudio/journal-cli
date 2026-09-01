@@ -38,6 +38,13 @@ journal tail [filters]              Follow new entries as they land
 journal context <id> [--before 50] [--after 50]   Stream around one entry
 ```
 
+### Managing API keys
+```
+journal keys list [--app <name>] [--json]
+journal keys create --app <name> [--public] [--origins <urls>] [--quota <N>] [--json]
+journal keys revoke <id>
+```
+
 ### log filters (logs and tail)
 ```
 --app <name>        Source app, exact match

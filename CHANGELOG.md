@@ -10,6 +10,15 @@ record what shipped rather than what was written down at the time.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-09-01
+
+### Added
+
+- `journal keys` command group (`list`, `create`, `revoke`) to manage secret backend and public browser ingest API keys from the terminal.
+- Application filter flag `--app` on `journal keys list`.
+- Browser public key creation flags (`--public`, `--origins`, `--quota`) on `journal keys create`.
+- Confirmation skip flag `--yes` / `-y` on `journal keys revoke`.
+
 ## [0.2.1] — 2026-08-24
 
 Release plumbing only. No change to the binary's behaviour.
@@ -94,7 +103,8 @@ Release plumbing only. No change to the binary's behaviour.
   `retryPoll` are split out, leaving the loop to own error handling and
   rendering.
 
-[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/FacileStudio/journal-cli/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/FacileStudio/journal-cli/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/FacileStudio/journal-cli/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/FacileStudio/journal-cli/releases/tag/v0.1.0
