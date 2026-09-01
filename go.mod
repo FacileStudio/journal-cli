@@ -1,6 +1,6 @@
 module github.com/FacileStudio/journal-cli
 
-go 1.26.5
+go 1.26
 
 require (
 	github.com/fatih/color v1.19.0
