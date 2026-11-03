@@ -26,7 +26,7 @@ id", "deployed but", "is it logging"
 
 ### Setup
 ```
-journal login [url]                 Authenticate (browser under SSO, or password)
+journal login [url]                 Authenticate (approval link under SSO, works over SSH, or password)
 journal logout                      Revoke the stored session
 ```
 

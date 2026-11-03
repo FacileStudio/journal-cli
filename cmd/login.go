@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/FacileStudio/porte/devicelogin"
 	"github.com/FacileStudio/porte/loopback"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -22,6 +23,7 @@ var (
 	flagEmail     string
 	flagPassword  string
 	flagNoBrowser bool
+	flagListener  bool
 )
 
 var loginCmd = &cobra.Command{
@@ -32,9 +34,14 @@ need neither. The URL is the argument, then JOURNAL_SERVER_URL, then the stored
 one, then https://journal.facile.studio.
 
 By default the login goes through single sign-on when the instance offers it:
-a browser opens, the flow redirects back to a one-time code on this machine,
-and the code is traded for a session token. An instance without SSO takes an
-address and a password on the command line instead.`,
+it prints an approval link and opens it in a browser when it can. Approve the
+sign-in there, on any device, and the login finishes on its own. Nothing is
+typed or pasted and nothing listens on a port, so it works over SSH.
+
+--listener uses the older flow instead: a browser redirects back to a one-time
+code on this machine. It is also the fallback when the instance has no device
+login yet. An instance without SSO takes an address and a password on the
+command line instead.`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signalContext()
@@ -91,9 +98,39 @@ address and a password on the command line instead.`,
 	},
 }
 
-// loginViaSSO runs the porte CLI flow: a listener on loopback, a browser, a
-// redirect back with a one-time code, and an exchange for the session token.
+// loginViaSSO runs the device login, falling back to the loopback listener
+// when --listener asks for it or the instance has no device exchange.
 func loginViaSSO(ctx context.Context, api *client.Client, base string) (string, error) {
+	if !flagListener {
+		session, err := devicelogin.Login(ctx, devicelogin.Options{
+			AppOrigin:   base,
+			Mount:       "/api",
+			OpenBrowser: func(link string) bool { return !flagNoBrowser && loopback.OpenBrowser(link) },
+		})
+		fallback, err := deviceOutcome(err, base)
+		if !fallback {
+			return session.Token, err
+		}
+		ui.Warn("this server has no device login yet, using the browser listener")
+	}
+	return loginViaListener(ctx, api, base)
+}
+
+// deviceOutcome reads the device login's error: whether to fall back to the
+// listener, and the error to report otherwise.
+func deviceOutcome(err error, base string) (bool, error) {
+	switch {
+	case errors.Is(err, devicelogin.ErrExchangeNotMounted):
+		return true, nil
+	case errors.Is(err, devicelogin.ErrAccountNotLinked):
+		return false, fmt.Errorf("sign in once at %s in a browser, then run login again", base)
+	}
+	return false, err
+}
+
+// loginViaListener runs the porte CLI flow: a listener on loopback, a browser, a
+// redirect back with a one-time code, and an exchange for the session token.
+func loginViaListener(ctx context.Context, api *client.Client, base string) (string, error) {
 	listener, err := loopback.Listen()
 	if err != nil {
 		return "", err
@@ -187,4 +224,5 @@ func init() {
 	loginCmd.Flags().StringVar(&flagEmail, "email", "", "Email address, skipping the prompt")
 	loginCmd.Flags().StringVar(&flagPassword, "password", "", "Password, skipping the prompt")
 	loginCmd.Flags().BoolVar(&flagNoBrowser, "no-browser", false, "Print the login URL instead of opening a browser")
+	loginCmd.Flags().BoolVar(&flagListener, "listener", false, "Use the loopback listener flow instead of the device login")
 }

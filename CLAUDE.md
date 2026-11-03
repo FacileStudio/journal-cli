@@ -63,10 +63,11 @@ SDK (`sdk/journal`) and browser SDK (`@facile/journal`).
 
 `journal login` asks the instance what it accepts (`GET /api/auth/config`), then either:
 
-- **SSO**: binds a loopback listener, opens `…/api/auth/oidc?flow=cli&port=N&cli_state=S`,
-  waits for the redirect with the one-time code, and trades it at
-  `/api/auth/oidc/exchange` — the porte CLI flow casier-cli uses. The state nonce is
-  echoed and verified, so a callback from a different login is refused.
+- **SSO**: `porte/devicelogin` runs the device grant against Registre, prints the approval
+  link, and trades the token at `/api/auth/oidc/device/exchange`. Nothing listens, so it
+  works over SSH. A 404 on that route, or `--listener`, falls back to the loopback flow:
+  bind a listener, open `…/api/auth/oidc?flow=cli&port=N&cli_state=S`, wait for the
+  one-time code, trade it at `/api/auth/oidc/exchange`.
 - **Password**: prompts for an address and a password, exchanged at `/api/auth/login`.
 
 Both end with a bearer token stored in `<config_dir>/journal/config.yml` (0600), and both

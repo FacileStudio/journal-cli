@@ -8,7 +8,7 @@ the dashboard. Authenticates through the same porte SSO flow the browser uses.
 
 ## What it does
 
-- `journal login` — browser SSO flow (one-time code via loopback) or password
+- `journal login` — prints an approval link (device login, works over SSH, nothing to type), or password
 - `journal logs` — query newest-first: app, level, full text, request id, time
 - `journal tail` — follow new entries as they land (2s poll, the dashboard's own cadence)
 - `journal context <id>` — the stream around one entry, with the anchor marked
@@ -21,7 +21,7 @@ the dashboard. Authenticates through the same porte SSO flow the browser uses.
 | Layer | Tech |
 |---|---|
 | CLI | Go 1.25, cobra, session token in a 0600 YAML config file |
-| Auth | porte SSO CLI flow (`?flow=cli` → loopback → `/auth/oidc/exchange`), or password |
+| Auth | porte device login (`porte/devicelogin` → `/auth/oidc/device/exchange`), loopback with `--listener`, or password |
 | Releases | GoReleaser via facile |
 
 ## Install
@@ -39,8 +39,9 @@ facile install journal
 ## Setup
 
 ```sh
-journal login                    # opens the browser, SSO when the instance offers it
-journal login --no-browser       # print the URL instead
+journal login                    # prints an approval link, works over SSH, nothing to type
+journal login --no-browser       # print the link without trying to open a browser
+journal login --listener         # the older loopback flow: the browser redirects to this machine
 journal login --email you@x --password …   # password flow, headless
 ```
 

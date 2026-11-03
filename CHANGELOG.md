@@ -10,6 +10,21 @@ record what shipped rather than what was written down at the time.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-03
+
+### Changed
+
+- `journal login` uses the device login from porte v0.9.0 by default. It prints an
+  approval link, tries to open it, and finishes once the sign-in is approved. Nothing is
+  typed or pasted and nothing listens on a port, so it works over SSH.
+- An instance without the device exchange falls back to the loopback listener with a
+  one-line notice. An account that never signed in through the browser is told to do so
+  once.
+
+### Added
+
+- `journal login --listener` forces the older loopback listener flow.
+
 ## [0.4.0] — 2026-11-03
 
 ### Changed
@@ -113,7 +128,8 @@ Release plumbing only. No change to the binary's behaviour.
   `retryPoll` are split out, leaving the loop to own error handling and
   rendering.
 
-[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/FacileStudio/journal-cli/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/FacileStudio/journal-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/FacileStudio/journal-cli/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/FacileStudio/journal-cli/compare/v0.2.0...v0.2.1
