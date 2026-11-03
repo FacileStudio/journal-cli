@@ -10,6 +10,16 @@ record what shipped rather than what was written down at the time.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-11-03
+
+### Changed
+
+- `journal login` uses porte's shared loopback listener, so the browser lands on the
+  suite's "you can close this tab" page. It prints the URL instead of opening a browser
+  when stdout is not a terminal.
+- The login help names the URL order: argument, `JOURNAL_SERVER_URL`, stored value,
+  `https://journal.facile.studio`.
+
 ## [0.3.0] — 2026-09-01
 
 ### Added
@@ -103,7 +113,8 @@ Release plumbing only. No change to the binary's behaviour.
   `retryPoll` are split out, leaving the loop to own error handling and
   rendering.
 
-[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/FacileStudio/journal-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/FacileStudio/journal-cli/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/FacileStudio/journal-cli/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/FacileStudio/journal-cli/compare/v0.1.0...v0.2.0

@@ -9,12 +9,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/FacileStudio/porte/loopback"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
 	"github.com/FacileStudio/journal-cli/internal/client"
 	"github.com/FacileStudio/journal-cli/internal/config"
-	"github.com/FacileStudio/journal-cli/internal/loopback"
 	"github.com/FacileStudio/journal-cli/internal/ui"
 )
 
@@ -28,7 +28,8 @@ var loginCmd = &cobra.Command{
 	Use:   "login [url]",
 	Short: "Authenticate with a Journal instance",
 	Long: `Stores the instance URL and the session token it returns, so later commands
-need neither. The URL defaults to the one already stored.
+need neither. The URL is the argument, then JOURNAL_SERVER_URL, then the stored
+one, then https://journal.facile.studio.
 
 By default the login goes through single sign-on when the instance offers it:
 a browser opens, the flow redirects back to a one-time code on this machine,
@@ -97,29 +98,34 @@ func loginViaSSO(ctx context.Context, api *client.Client, base string) (string, 
 	if err != nil {
 		return "", err
 	}
+	defer listener.Close()
+	listener.AppName = "Journal"
+
 	state, err := loopback.RandomState()
 	if err != nil {
 		return "", err
 	}
 
-	loginURL := listener.LoginURL(base, state)
-	if flagNoBrowser || !loopback.OpenBrowser(loginURL) {
+	loginURL := listener.LoginURL(base, "/api", state)
+	if flagNoBrowser || !term.IsTerminal(int(os.Stdout.Fd())) || !loopback.OpenBrowser(loginURL) {
 		ui.Step("open this URL to sign in")
 		ui.Plain("%s", loginURL)
 	} else {
 		ui.Step("opening your browser to sign in")
-		ui.Hint("if nothing opened, copy the URL printed with --no-browser")
 	}
 
 	ui.Step("waiting for the login to complete")
-	code, err := listener.WaitForCode(state)
+	code, err := listener.WaitForCode(ctx, state)
 	if err != nil {
+		if errors.Is(err, loopback.ErrTimeout) {
+			return "", errors.New("timed out waiting for the browser, run 'journal login' again")
+		}
 		return "", err
 	}
 
 	token, err := api.Exchange(ctx, code)
 	if err != nil {
-		return "", fmt.Errorf("the login code was refused — %w", err)
+		return "", fmt.Errorf("the login code was refused: %w", err)
 	}
 	return token, nil
 }
