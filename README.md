@@ -80,3 +80,7 @@ mise run build      # go build -o bin/journal .
 mise run check      # gofmt + vet + test
 mise run format     # rewrite Go sources in place
 ```
+
+## License
+
+journal-cli is released under the [MIT License](LICENSE).
