@@ -10,6 +10,16 @@ record what shipped rather than what was written down at the time.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-11-11
+
+### Security
+
+- build: Go 1.26.11 (`go` directive in the CLI and the mock server, mise pin). It fixes GO-2026-6848 to GO-2026-6859 in the standard library and toolchain, which douane reported as unscored gaps and which failed the gate.
+
+### Changed
+
+- refactor: clear staticcheck SA4006 in `cmd/format.go` and ST1013 in `scripts/mock`, which failed `filet gate` before this release.
+
 ### Added
 
 - journal-cli is released under the [MIT License](LICENSE).
@@ -132,7 +142,8 @@ Release plumbing only. No change to the binary's behaviour.
   `retryPoll` are split out, leaving the loop to own error handling and
   rendering.
 
-[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/FacileStudio/journal-cli/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/FacileStudio/journal-cli/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/FacileStudio/journal-cli/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/FacileStudio/journal-cli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/FacileStudio/journal-cli/compare/v0.2.1...v0.3.0
