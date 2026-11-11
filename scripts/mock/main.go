@@ -22,7 +22,7 @@ func main() {
 	})
 	http.HandleFunc("/api/logs", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer tok" {
-			http.Error(w, `{"error":{"code":"unauthenticated"}}`, 401)
+			http.Error(w, `{"error":{"code":"unauthenticated"}}`, http.StatusUnauthorized)
 			return
 		}
 		out := []map[string]any{entries[2], entries[1], entries[0]}
@@ -30,7 +30,7 @@ func main() {
 	})
 	http.HandleFunc("/api/logs/3/context", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer tok" {
-			http.Error(w, `{"error":{"code":"unauthenticated"}}`, 401)
+			http.Error(w, `{"error":{"code":"unauthenticated"}}`, http.StatusUnauthorized)
 			return
 		}
 		json.NewEncoder(w).Encode(map[string]any{
@@ -40,7 +40,7 @@ func main() {
 	})
 	http.HandleFunc("/api/apps", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer tok" {
-			http.Error(w, `{"error":{"code":"unauthenticated"}}`, 401)
+			http.Error(w, `{"error":{"code":"unauthenticated"}}`, http.StatusUnauthorized)
 			return
 		}
 		json.NewEncoder(w).Encode(map[string]any{"apps": []map[string]any{

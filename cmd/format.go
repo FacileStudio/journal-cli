@@ -11,11 +11,9 @@ import (
 
 // renderEntry prints one log entry as a code line.
 func renderEntry(entry client.Entry, clock bool) {
-	at := entry.CreatedAt
+	at := relativeTime(entry.CreatedAt)
 	if clock {
 		at = clockTime(entry.CreatedAt)
-	} else {
-		at = relativeTime(entry.CreatedAt)
 	}
 	fmt.Fprintf(
 		ui.Stdout(),
