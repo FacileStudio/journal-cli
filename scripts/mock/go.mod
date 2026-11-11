@@ -1,3 +1,3 @@
 module github.com/FacileStudio/journal-cli/scripts/mock
 
-go 1.26
+go 1.26.11
