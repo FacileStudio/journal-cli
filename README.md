@@ -30,10 +30,14 @@ the dashboard. Authenticates through the same porte SSO flow the browser uses.
 curl -fsSL https://raw.githubusercontent.com/FacileStudio/journal-cli/main/install.sh | bash
 ```
 
-Already have `facile`:
+Installs to `~/.local/bin` via [kit](https://github.com/FacileStudio/kit), the Facile package manager.
+Pass `--bin-dir <dir>` to change that, `--source` to build from source, `--no-skill` to skip AI
+agent skill registration.
+
+Already have `kit`:
 
 ```sh
-facile install journal
+kit add journal
 ```
 
 ## Setup
